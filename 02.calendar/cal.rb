@@ -5,7 +5,7 @@ require 'date'
 
 WEEKDAYS = %w[日 月 火 水 木 金 土].freeze
 WEEK_STR_LENGTH = 20
-REGEX_OF_MONTH = /\A[1-9]\z|\A1[0−2]\z|\A0[1-9]\z/.freeze
+REGEX_OF_MONTH = /\A[1-9]\z|\A1[0-2]\z|\A0[1-9]\z/.freeze
 REGEX_OF_YEAR = /\A[0-9]{1,3}[0-9]\z|\A[0-9]{,3}[1-9]\z/.freeze
 
 options = ARGV.getopts('y:m:', 'h')
