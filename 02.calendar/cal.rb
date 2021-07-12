@@ -1,5 +1,7 @@
 #!/usr/bin/env ruby
 
+# frozen_string_literal: true
+
 require 'optparse'
 require 'date'
 
@@ -54,10 +56,10 @@ one_week = []
     )
 
   # date == 土曜日 or 最終日の場合、one_week配列を出力する
-  if date.saturday?
-    puts one_week.join(' ').rjust(WEEK_STR_LENGTH)
-    one_week.clear
-  elsif day == end_of_month.day
-    puts one_week.join(' ')
-  end
+  next unless date.saturday? || day == end_of_month.day
+
+  # 初週の場合に配列の要素数を7個に調整する
+  (7 - one_week.size).times { one_week.unshift('  ') } if (day != end_of_month.day) && (one_week.size < 7)
+  puts one_week.join(' ')
+  one_week.clear
 end
