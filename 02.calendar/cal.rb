@@ -5,7 +5,6 @@
 require 'optparse'
 require 'date'
 
-WEEKDAYS = %w[日 月 火 水 木 金 土].freeze
 WEEK_STR_LENGTH = 20
 REGEX_OF_MONTH = /\A[1-9]\z|\A1[0-2]\z|\A0[1-9]\z/.freeze
 REGEX_OF_YEAR = /\A[0-9]{1,3}[0-9]\z|\A[0-9]{,3}[1-9]\z/.freeze
@@ -40,27 +39,24 @@ end_of_month = Date.new(year, month, -1)
 # m月 Yを出力
 puts end_of_month.strftime('%-m月 %-Y').center(WEEK_STR_LENGTH)
 # 曜日の文字列を出力
-puts WEEKDAYS.join(' ')
+puts '日 月 火 水 木 金 土'
+# 初週の空白を調整
+print(' ' * (Date.new(year, month, 1).wday * 3))
 
-case Date.new(year, month, 1).wday
-when 1
-  print ' ' * 3
-when 2
-  print ' ' * 6
-when 3
-  print ' ' * 9
-when 4
-  print ' ' * 12
-when 5
-  print ' ' * 15
-when 6
-  print ' ' * 18
-end
-
+week_count = 0
 (1..end_of_month.day).each do |day|
   date = Date.new(year, month, day)
   # 今日の日付の場合は、文字色と背景色を反転
   print(!options['h'] && date == today ? format("\e[7m%2d\e[0m ", day) : format('%2d ', day))
-  print "\n" if date.saturday? || date.day == end_of_month.day
+  if date.saturday? || date.day == end_of_month.day
+    print "\n"
+    week_count += 1
+  end
 end
-print "\n"
+# 出力する行数を調整
+case week_count
+when 5
+  print "\n"
+when 4
+  print "\n\n"
+end
