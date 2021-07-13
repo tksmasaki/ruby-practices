@@ -42,24 +42,25 @@ puts end_of_month.strftime('%-m月 %-Y').center(WEEK_STR_LENGTH)
 # 曜日の文字列を出力
 puts WEEKDAYS.join(' ')
 
-one_week = []
+case Date.new(year, month, 1).wday
+when 1
+  print ' ' * 3
+when 2
+  print ' ' * 6
+when 3
+  print ' ' * 9
+when 4
+  print ' ' * 12
+when 5
+  print ' ' * 15
+when 6
+  print ' ' * 18
+end
+
 (1..end_of_month.day).each do |day|
   date = Date.new(year, month, day)
-  one_week <<
-    (
-      # 今日の日付の場合は、文字色と背景色を反転
-      if !options['h'] && date == today
-        format("\e[7m%2d\e[0m", day)
-      else
-        format('%2d', day)
-      end
-    )
-
-  # date == 土曜日 or 最終日の場合、one_week配列を出力する
-  next unless date.saturday? || day == end_of_month.day
-
-  # 初週の場合に配列の要素数を7個に調整する
-  (7 - one_week.size).times { one_week.unshift('  ') } if (day != end_of_month.day) && (one_week.size < 7)
-  puts one_week.join(' ')
-  one_week.clear
+  # 今日の日付の場合は、文字色と背景色を反転
+  print(!options['h'] && date == today ? format("\e[7m%2d\e[0m ", day) : format('%2d ', day))
+  print "\n" if date.saturday? || date.day == end_of_month.day
 end
+print "\n"
