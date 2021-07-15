@@ -1,5 +1,7 @@
 #!/usr/bin/env ruby
 
+# frozen_string_literal: true
+
 (1..20).each do |num|
   if num.modulo(15).zero?
     puts 'FizzBuzz'
