@@ -11,10 +11,7 @@ ARGV[0].split(',').each do |score|
   end
 end
 
-frames = []
-scores.each_slice(2) do |score|
-  frames << score
-end
+frames = scores.each_slice(2).to_a
 
 result = 0
 frames.each_with_index do |frame, i|
