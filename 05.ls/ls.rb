@@ -82,7 +82,7 @@ def output_formatted_items(file, cols_width)
     else
       file.mtime.strftime('%_m %e %_5Y')
     end
-  puts "#{file.mode} #{formatted_items[0]} #{formatted_items[1]}  #{formatted_items[2]}  #{formatted_items[3]} #{formatted_items[4]} #{file.name}"
+  puts "#{file.mode}  #{formatted_items[0]} #{formatted_items[1]}  #{formatted_items[2]}  #{formatted_items[3]} #{formatted_items[4]} #{file.name}"
 end
 
 module LS
