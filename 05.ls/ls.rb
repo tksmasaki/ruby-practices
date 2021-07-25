@@ -5,17 +5,18 @@
 require 'optparse'
 require 'etc'
 require 'date'
+require 'io/console/size'
 
 def main
   options = ARGV.getopts('alr')
 
-  files = reirieve_files(options['a'])
+  files = retrieve_files(options['a'])
   files.reverse! if options['r']
 
   options['l'] ? output_fnames_with_details(files) : output_fnames(files)
 end
 
-def reirieve_files(option_a)
+def retrieve_files(option_a)
   flags = option_a ? File::FNM_DOTMATCH : 0
   base_directory = ARGV[0] || Dir.pwd
   file_names = Dir.glob('*', flags, base: base_directory)
@@ -28,15 +29,12 @@ def reirieve_files(option_a)
 end
 
 def output_fnames(files)
-  col_width = 0
-  files.each do |file|
-    col_width = file.name.length if col_width < file.name.length
-  end
+  col_width = files.map { |f| f.name.length }.max
 
   tab_width = 8 #=> lsのソースコードでcolorized outputされない時の初期値
   col_width = (col_width + tab_width) & ~(tab_width - 1)
 
-  term_width = `tput cols`.to_i
+  term_width = IO.console_size[1]
   num_cols = term_width / col_width
   num_rows = files.size / num_cols
   num_rows += 1 unless (files.size % num_cols).zero?
@@ -66,23 +64,25 @@ def output_fnames_with_details(files)
   puts "total #{blocks}"
 
   files.each do |file|
-    output_formatted_items(file, cols_width)
+    output_cols(file, cols_width)
   end
 end
 
-def output_formatted_items(file, cols_width)
-  formatted_items = []
-  formatted_items << format("%#{cols_width[:nlink]}d", file.nlink)
-  formatted_items << format("%-#{cols_width[:owner]}s", file.owner)
-  formatted_items << format("%-#{cols_width[:group]}s", file.group)
-  formatted_items << format("%#{cols_width[:size]}d", file.size)
-  formatted_items <<
+def output_cols(file, cols_width)
+  cols = []
+  cols << "#{file.mode}#{' ' * 2}"
+  cols << "#{format("%#{cols_width[:nlink]}d", file.nlink)} "
+  cols << "#{format("%-#{cols_width[:owner]}s", file.owner)}#{' ' * 2}"
+  cols << "#{format("%-#{cols_width[:group]}s", file.group)}#{' ' * 2}"
+  cols << "#{format("%#{cols_width[:size]}d", file.size)} "
+  cols <<
     if file.mtime.year == Date.today.year
-      file.mtime.strftime('%_m %e %H:%M')
+      "#{file.mtime.strftime('%_m %e %H:%M')} "
     else
-      file.mtime.strftime('%_m %e %_5Y')
+      "#{file.mtime.strftime('%_m %e %_5Y')} "
     end
-  puts "#{file.mode}  #{formatted_items[0]} #{formatted_items[1]}  #{formatted_items[2]}  #{formatted_items[3]} #{formatted_items[4]} #{file.name}"
+  cols << file.name
+  puts cols.join
 end
 
 module LS
