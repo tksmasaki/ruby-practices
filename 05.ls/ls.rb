@@ -69,20 +69,24 @@ def output_fnames_with_details(files)
 end
 
 def output_cols(file, cols_width)
-  cols = []
-  cols << "#{file.mode}#{' ' * 2}"
-  cols << "#{format("%#{cols_width[:nlink]}d", file.nlink)} "
-  cols << "#{format("%-#{cols_width[:owner]}s", file.owner)}#{' ' * 2}"
-  cols << "#{format("%-#{cols_width[:group]}s", file.group)}#{' ' * 2}"
-  cols << "#{format("%#{cols_width[:size]}d", file.size)} "
-  cols <<
-    if file.mtime.year == Date.today.year
-      "#{file.mtime.strftime('%_m %e %H:%M')} "
-    else
-      "#{file.mtime.strftime('%_m %e %_5Y')} "
-    end
-  cols << file.name
+  cols = [
+    "#{file.mode}#{' ' * 2}",
+    "#{format("%#{cols_width[:nlink]}d", file.nlink)} ",
+    "#{format("%-#{cols_width[:owner]}s", file.owner)}#{' ' * 2}",
+    "#{format("%-#{cols_width[:group]}s", file.group)}#{' ' * 2}",
+    "#{format("%#{cols_width[:size]}d", file.size)} ",
+    format_mtime(file.mtime),
+    file.name
+  ]
   puts cols.join
+end
+
+def format_mtime(mtime)
+  if mtime.year == Date.today.year
+    "#{mtime.strftime('%_m %e %H:%M')} "
+  else
+    "#{mtime.strftime('%_m %e %_5Y')} "
+  end
 end
 
 module LS
