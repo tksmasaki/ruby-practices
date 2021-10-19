@@ -82,10 +82,11 @@ def output_cols(file, cols_width)
 end
 
 def format_mtime(mtime)
-  if mtime.year == Date.today.year
-    "#{mtime.strftime('%_m %e %H:%M')} "
-  else
+  today = Date.today
+  if mtime < today.prev_month(6).to_time || today.next_month(6).to_time < mtime
     "#{mtime.strftime('%_m %e %_5Y')} "
+  else
+    "#{mtime.strftime('%_m %e %H:%M')} "
   end
 end
 
