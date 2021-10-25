@@ -10,14 +10,20 @@ class Frame
   end
 
   def score
-    @third_shot.nil? ? [@first_shot.score, @second_shot.score].sum : [@first_shot.score, @second_shot.score, @third_shot.score].sum
+    score = [@first_shot.score, @second_shot.score].sum
+    score += @third_shot.score unless @third_shot.nil?
+    score
   end
 
   def marks
-    @third_shot.nil? ? [@first_shot.mark, @second_shot.mark] : [@first_shot.mark, @second_shot.mark, @third_shot.mark]
+    marks = [@first_shot.mark, @second_shot.mark]
+    marks << @third_shot.mark unless @third_shot.nil?
+    marks
   end
 
   def shot_scores
-    @third_shot.nil? ? [@first_shot.score, @second_shot.score] : [@first_shot.score, @second_shot.score, @third_shot.score]
+    shot_scores = [@first_shot.score, @second_shot.score]
+    shot_scores << @third_shot.score unless @third_shot.nil?
+    shot_scores
   end
 end
