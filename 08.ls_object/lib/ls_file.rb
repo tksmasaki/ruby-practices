@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'date'
 require 'etc'
 require_relative './mode_converter'
 
@@ -39,5 +40,11 @@ class LsFile
 
   def blocks
     @stat.blocks
+  end
+
+  def mtime_before_or_after_month?(num_months)
+    mdate = Date.parse(mtime.strftime('%F'))
+    today = Date.today
+    mdate < today.prev_month(num_months) || today.next_month(num_months) < mdate
   end
 end
