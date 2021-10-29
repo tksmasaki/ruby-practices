@@ -74,13 +74,13 @@ class TestCommand < Test::Unit::TestCase
 
   # 期待値(expected) => ファイルの所有者などの実行環境に依存する項目があるため、lsコマンドの実行結果を代入
   def test_ls_list_with_option_l
-    expected = `\ls -l`.split("\n")
+    expected = `ls -l`.split("\n")
     command = Command.new(options: { 'l' => true })
     assert_equal expected, command.ls_list
   end
 
   def test_ls_list_with_option_alr
-    expected = `\ls -alr`.split("\n")
+    expected = `ls -alr`.split("\n")
     command = Command.new(options: { 'a' => true, 'l' => true, 'r' => true })
     assert_equal expected, command.ls_list
   end
