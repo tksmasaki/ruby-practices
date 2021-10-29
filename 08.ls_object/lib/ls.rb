@@ -3,9 +3,9 @@
 # frozen_string_literal: true
 
 require 'optparse'
-require_relative './lib/command'
+require_relative './command'
 
 options = ARGV.getopts('alr')
 directory = ARGV[0]
-
-Command.new(directory: directory, options: options).run_ls
+command = Command.new(directory: directory, options: options)
+puts command.ls_list

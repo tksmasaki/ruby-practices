@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-require 'date'
 require 'io/console/size'
 require_relative './ls_file'
+require_relative './ls_formatter'
 
 class Command
   def initialize(directory: nil, options: {})
@@ -12,8 +12,13 @@ class Command
     @files.reverse! if @options['r']
   end
 
-  def run_ls(term_width: IO.console_size[1])
-    @options['l'] ? output_long_list : output_list(term_width)
+  def ls_list(term_width: IO.console_size[1])
+    if @options['l']
+      blocks = @files.map(&:blocks).sum
+      ["total #{blocks}", *long_file_list]
+    else
+      file_list(term_width)
+    end
   end
 
   private
@@ -21,70 +26,35 @@ class Command
   def retrieve_files
     flags = @options['a'] ? File::FNM_DOTMATCH : 0
     file_names = Dir.glob('*', flags, base: @directory)
-    files = []
-    file_names.each do |name|
-      file_path = "#{@directory}/#{name}"
-      files << LsFile.new(file_path)
-    end
-    files
+    file_names.map { |name| LsFile.new("#{@directory}/#{name}") }
   end
 
-  def output_list(term_width)
-    fname_width = @files.map { |f| f.name.length }.max
-    tab_width = 8 #=> lsのソースコードでcolorized outputされない時の初期値(macOS)
-    col_width = (fname_width + tab_width) & ~(tab_width - 1)
+  def file_list(term_width)
+    file_name_width = @files.map { |f| f.name.length }.max
+    tab_width = 8 # => lsのソースコードでcolorized outputされない時の初期値(macOS)
+    col_width = (file_name_width + tab_width) & ~(tab_width - 1) # => tab_widthの倍数になる
 
     num_cols = [(term_width / col_width), 1].max
-    num_rows = @files.size / num_cols
-    num_rows += 1 unless (@files.size % num_cols).zero?
+    num_rows = (@files.size / num_cols.to_f).ceil
 
-    num_rows.times do |i|
-      output_line = []
+    Array.new(num_rows) do |i|
       limit = num_rows * (num_cols - 1) + i
-      i.step(limit, num_rows) do |n|
-        output_line << format("%-#{col_width}s", @files[n].name) if @files[n]
+      line = i.step(limit, num_rows).map do |n|
+        @files[n] ? format("%-#{col_width}s", @files[n].name) : ''
       end
-      puts output_line.join.rstrip
+      line.join.rstrip
     end
   end
 
-  def output_long_list
-    blocks = @files.map(&:blocks).sum
-    puts "total #{blocks}"
-
-    @files.each do |file|
-      puts long_format_row(file)
-    end
-  end
-
-  def long_format_row(file)
-    cols_width = long_format_cols_width
-    [
-      "#{file.mode}#{' ' * 2}",
-      "#{format("%#{cols_width[:nlink]}d", file.nlink)} ",
-      "#{format("%-#{cols_width[:owner]}s", file.owner)}#{' ' * 2}",
-      "#{format("%-#{cols_width[:group]}s", file.group)}#{' ' * 2}",
-      "#{format("%#{cols_width[:size]}d", file.size)} ",
-      format_mtime(file.mtime),
-      file.name
-    ].join
-  end
-
-  def long_format_cols_width
-    {
-      nlink: @files.map { |f| f.nlink.to_s.length }.max,
-      owner: @files.map { |f| f.owner.to_s.length }.max,
-      group: @files.map { |f| f.group.to_s.length }.max,
-      size: @files.map { |f| f.size.to_s.length }.max
-    }
-  end
-
-  def format_mtime(mtime)
-    today = Date.today
-    if mtime < today.prev_month(6).to_time || today.next_month(6).to_time < mtime
-      "#{mtime.strftime('%b %e %_5Y')} "
-    else
-      "#{mtime.strftime('%b %e %H:%M')} "
+  def long_file_list
+    cols_width = [
+      @files.map { |f| f.nlink.to_s.length }.max,
+      @files.map { |f| f.owner.length }.max,
+      @files.map { |f| f.group.length }.max,
+      @files.map { |f| f.size.to_s.length }.max
+    ]
+    @files.map do |file|
+      LsFormatter.format_long_row(file, *cols_width)
     end
   end
 end
