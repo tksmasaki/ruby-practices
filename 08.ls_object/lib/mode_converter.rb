@@ -25,7 +25,7 @@ class ModeConverter
   def self.convert_file_mode(mode)
     octal_mode = format('%06d', mode.to_s(8))
     type = FILE_TYPES[octal_mode[0..1]]
-    permission = octal_mode[3..5].chars.map { |c| FILE_PERMISSIONS[c] }.join
+    permission = octal_mode[3..5].gsub(/[0-7]/, FILE_PERMISSIONS)
     type + permission
   end
 end
