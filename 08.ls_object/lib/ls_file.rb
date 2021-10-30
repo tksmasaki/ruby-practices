@@ -42,9 +42,10 @@ class LsFile
     @stat.blocks
   end
 
-  def mtime_before_or_after_month?(num_months)
-    mdate = Date.parse(mtime.strftime('%F'))
-    today = Date.today
-    mdate < today.prev_month(num_months) || today.next_month(num_months) < mdate
+  def mtime_before_or_after_month?(num_months, compared_time = Time.now)
+    base_time = DateTime.parse(compared_time.to_s)
+    prev_time = base_time.prev_month(num_months).to_time
+    next_time = base_time.next_month(num_months).to_time
+    mtime < prev_time || next_time < mtime
   end
 end

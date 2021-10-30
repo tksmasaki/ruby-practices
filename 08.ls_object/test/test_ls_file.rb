@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 require 'test/unit'
-require 'date'
 require 'etc'
 require 'tempfile'
+require 'time'
 require_relative '../lib/ls_file'
 
 class TestLsFile < Test::Unit::TestCase
@@ -23,22 +23,26 @@ class TestLsFile < Test::Unit::TestCase
   end
 
   data(
-    case1: [true, Date.today.prev_month(7), 6],
-    case2: [false, Date.today.prev_month(5), 5],
-    case3: [false, Date.today.prev_month(3), 4],
-    case4: [true, Date.today.next_month(7), 6],
-    case5: [false, Date.today.next_month(5), 5],
-    case6: [false, Date.today.next_month(3), 4]
+    # 境界値
+    case1: [true, 6, '2021-01-15 11:59:59'],
+    case2: [false, 6, '2021-01-15 12:00:00'],
+    case3: [false, 4, '2021-11-15 12:00:00'],
+    case4: [true, 4, '2021-11-15 12:00:01'],
+    # 代表値
+    case5: [true, 5, '2020-11-15 12:00:00'],
+    case6: [false, 5, '2021-04-15 12:00:00'],
+    case7: [false, 5, '2021-10-15 12:00:00'],
+    case8: [true, 5, '2022-03-15 12:00:00']
   )
   def test_mtime_before_or_after_month(data)
-    expected, file_mdate, num_months = data
+    expected, num_months, modified_time = data
     Tempfile.create('testfile') do |f|
       ls_file = LsFile.new(f.path)
-
       # LsFile.mtime が指定の日時を返すようにする
-      ls_file.define_singleton_method(:mtime) { file_mdate.to_time }
+      ls_file.define_singleton_method(:mtime) { Time.parse(modified_time) }
 
-      assert_equal expected, ls_file.mtime_before_or_after_month?(num_months)
+      compared_time = Time.parse('2021-07-15 12:00:00')
+      assert_equal expected, ls_file.mtime_before_or_after_month?(num_months, compared_time)
     end
   end
 end
