@@ -32,7 +32,7 @@ class Command
   def file_list(term_width)
     file_name_width = @files.map { |f| f.name.length }.max
     tab_width = 8 # => lsのソースコードでcolorized outputされない時の初期値(macOS)
-    col_width = (file_name_width + tab_width) & ~(tab_width - 1) # => tab_widthの倍数になる
+    col_width = tab_width * (file_name_width / tab_width + 1) # => tab_widthの倍数になる
 
     num_cols = [(term_width / col_width), 1].max
     num_rows = (@files.size / num_cols.to_f).ceil
@@ -47,14 +47,14 @@ class Command
   end
 
   def long_file_list
-    cols_width = [
-      @files.map { |f| f.nlink.to_s.length }.max,
-      @files.map { |f| f.owner.length }.max,
-      @files.map { |f| f.group.length }.max,
-      @files.map { |f| f.size.to_s.length }.max
-    ]
+    cols_widths = {
+      nlink: @files.map { |f| f.nlink.to_s.length }.max,
+      owner: @files.map { |f| f.owner.length }.max,
+      group: @files.map { |f| f.group.length }.max,
+      size: @files.map { |f| f.size.to_s.length }.max
+    }
     @files.map do |file|
-      LsFormatter.format_long_row(file, *cols_width)
+      LsFormatter.format_long_row(file, cols_widths)
     end
   end
 end
