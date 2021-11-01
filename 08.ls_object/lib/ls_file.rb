@@ -43,6 +43,7 @@ class LsFile
   end
 
   def mtime_before_or_after_month?(num_months, compared_time = Time.now)
+    # 簡単に月数の加減をするために DateTimeクラスを使用（ Ruby3.0 では非推奨）
     base_time = DateTime.parse(compared_time.to_s)
     prev_time = base_time.prev_month(num_months).to_time
     next_time = base_time.next_month(num_months).to_time

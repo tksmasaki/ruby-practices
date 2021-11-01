@@ -10,20 +10,20 @@ class TestLsFile < Test::Unit::TestCase
     # テンポラリファイルのモード => -rw-------
     case1: [
       '-rw-------  1 root  staff  100 Jul 15 12:00 test_file',
-      { nlink: 1, owner: 4, group: 5, size: 3 }
+      { nlink: 1, owner: 4, group: 5, file_size: 3 }
     ],
     case2: [
       '-rw-------    1 root    staff      100 Jul 15 12:00 test_file',
-      { nlink: 3, owner: 6, group: 7, size: 5 }
+      { nlink: 3, owner: 6, group: 7, file_size: 5 }
     ],
     case3: [
       '-rw-------  1 root  staff  100 Jul 15 12:00 test_file',
-      { nlink: 0, owner: 0, group: 0, size: 0 }
+      { nlink: 0, owner: 0, group: 0, file_size: 0 }
     ]
   )
   def test_format_long_row(data)
     Tempfile.create('testfile') do |f|
-      expected, cols_widths = data
+      expected, col_widths = data
       fixed_time = Time.parse('2021-07-15 12:00:00')
 
       ls_file = LsFile.new(f.path)
@@ -31,11 +31,11 @@ class TestLsFile < Test::Unit::TestCase
       ls_file.define_singleton_method(:nlink) { 1 }
       ls_file.define_singleton_method(:owner) { 'root' }
       ls_file.define_singleton_method(:group) { 'staff' }
-      ls_file.define_singleton_method(:size) { '100' }
+      ls_file.define_singleton_method(:size) { 100 }
       ls_file.define_singleton_method(:mtime) { fixed_time }
       ls_file.define_singleton_method(:name) { 'test_file' }
 
-      assert_equal expected, LsFormatter.format_long_row(ls_file, cols_widths, fixed_time)
+      assert_equal expected, LsFormatter.format_long_row(ls_file, col_widths, fixed_time)
     end
   end
 
